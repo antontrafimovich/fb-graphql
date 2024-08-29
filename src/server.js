@@ -1,4 +1,14 @@
-import { buildSchema, graphql } from "graphql";
+import {
+  graphql,
+  GraphQLEnumType,
+  GraphQLID,
+  GraphQLInterfaceType,
+  GraphQLList,
+  GraphQLNonNull,
+  GraphQLObjectType,
+  GraphQLSchema,
+  GraphQLString,
+} from "graphql";
 import { createServer } from "node:http";
 
 // create stub array of football players
@@ -45,109 +55,125 @@ const clubs = [
   },
 ];
 
-const schema = buildSchema(`
-    interface Node {
-      id: ID!
-    }
-
-    type Player implements Node {
-      id: ID!
-      name: String!
-      position: Position!
-      team: Club!
-    }
-
-    type Club implements Node {
-      id: ID!
-      name: String!
-      country: String!
-      coach: Coach!
-      players: [Player!]!
-    }
-
-    enum Position {
-      Defender
-      Midfielder
-      Forward
-    }
-
-    type Coach implements Node {
-      id: ID!
-      name: String!
-      team: Club!
-    }
-
-    type Query {
-        player(name: String!): Player!
-        players: [Player!]!
-
-        clubs: [Club!]!
-        club(name: String!): Club!
-
-        coach(club: String!): Coach!
-    }
-
-    type Mutation {
-      addPlayer(name: String!, position: Position!, team: String!): Player!
-    }
-`);
-
-class Player {
-  constructor(id, { name, position, team }) {
-    this.id = id;
-    this.name = name;
-    this.position = position;
-    this.teamName = team;
-  }
-
-  team() {
-    const club = clubs.find((club) => club.name === this.teamName);
-    return new Club(club.id, club);
-  }
-}
-
-class Club {
-  constructor(id, { name, country }) {
-    this.id = id;
-    this.name = name;
-    this.country = country;
-  }
-
-  players() {
-    return players
-      .filter((player) => player.team === this.name)
-      .map((player) => new Player(player.id, player));
-  }
-}
-
-const rootValue = {
-  player: (name) => {
-    return players.find((player) => player.name === name);
+const Node = new GraphQLInterfaceType({
+  name: "Node",
+  fields: {
+    id: { type: GraphQLID },
   },
-  players: () => {
-    return players;
+});
+
+const Position = new GraphQLEnumType({
+  name: "Position",
+  values: {
+    Defender: { value: "Defender" },
+    Midfielder: { value: "Midfielder" },
+    Forward: { value: "Forward" },
   },
-  clubs: () => {
-    return clubs.map((club) => new Club(club.id, club));
+});
+
+const Coach = new GraphQLObjectType({
+  name: "Coach",
+  interfaces: [Node],
+  fields: () => ({
+    id: { type: new GraphQLNonNull(GraphQLID) },
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    team: { type: new GraphQLNonNull(GraphQLString) },
+    teamInfo: {
+      type: new GraphQLNonNull(Club),
+      resolve: (coach) => {
+        return clubs.find((club) => coach.team === club.name);
+      },
+    },
+  }),
+});
+
+const Player = new GraphQLObjectType({
+  name: "Player",
+  interfaces: [Node],
+  fields: () => ({
+    id: { type: new GraphQLNonNull(GraphQLID) },
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    position: { type: new GraphQLNonNull(Position) },
+    team: { type: new GraphQLNonNull(GraphQLString) },
+    teamInfo: {
+      type: new GraphQLNonNull(Club),
+      resolve: (player) => {
+        return clubs.find((club) => club.name === player.team);
+      },
+    },
+  }),
+});
+
+const Club = new GraphQLObjectType({
+  name: "Club",
+  interfaces: [Node],
+  fields: {
+    id: { type: new GraphQLNonNull(GraphQLID) },
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    country: { type: new GraphQLNonNull(GraphQLString) },
+    coach: {
+      type: new GraphQLNonNull(Coach),
+      resolve: (club) => {
+        return coaches.find((coach) => coach.team === club.name);
+      },
+    },
+    players: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Player))),
+      resolve: (club) => {
+        return players.filter((player) => player.team === club.name);
+      },
+    },
   },
-  club: ({ name }) => {
-    return clubs.find((club) => club.name === name);
+});
+
+const Query = new GraphQLObjectType({
+  name: "Query",
+  fields: {
+    player: {
+      type: new GraphQLNonNull(Player),
+      args: {
+        name: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: (_, { name }) => {
+        return players.find((player) => player.name === name);
+      },
+    },
+    players: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Player))),
+      resolve: () => {
+        return players;
+      },
+    },
+    clubs: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Club))),
+      resolve: () => {
+        return clubs;
+      },
+    },
+    club: {
+      type: new GraphQLNonNull(Club),
+      args: {
+        name: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: (_, { name }) => {
+        return clubs.find((club) => club.name === name);
+      },
+    },
+    coach: {
+      type: new GraphQLNonNull(Coach),
+      args: {
+        club: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: (_, { club }) => {
+        return coaches.find((coach) => coach.team === club);
+      },
+    },
   },
-  coach: ({ club }, ctx, info) => {
-    console.log(info);
-    return coaches.find((coach) => coach.team === club);
-  },
-  addPlayer: ({ name, position, team }) => {
-    const newPlayer = {
-      name,
-      position,
-      team,
-    };
-    console.log(newPlayer);
-    players.push(newPlayer);
-    return newPlayer;
-  },
-};
+});
+
+const schema = new GraphQLSchema({
+  query: Query,
+});
 
 createServer((req, res) => {
   if (req.method === "POST" && req.url === "/graphql") {
@@ -161,7 +187,7 @@ createServer((req, res) => {
       const source = JSON.parse(query);
       graphql({
         schema,
-        rootValue: rootValue,
+        // rootValue: rootValue,
         source: source.query,
         variableValues: source.variables,
       }).then((response) => {
