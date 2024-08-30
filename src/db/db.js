@@ -1,17 +1,17 @@
 // create stub array of football players
 const players = [
-  { id: "222", name: "Anton", position: "Defender", team: "Real Madrid" },
-  { id: "333", name: "John", position: "Midfielder", team: "Barcelona" },
-  { id: "444", name: "Mike", position: "Forward", team: "Liverpool" },
+  { id: "222", name: "Anton", position: "Defender", clubId: "1" },
+  { id: "333", name: "John", position: "Midfielder", clubId: "2" },
+  { id: "444", name: "Mike", position: "Forward", clubId: "3" },
 ];
 
 // create stub array of football coaches
 const coaches = [
-  { id: "qwe", name: "Alex", team: "Real Madrid" },
-  { id: "asd", name: "David", team: "Barcelona" },
-  { id: "123", name: "Michael", team: "Liverpool" },
-  { id: "zxcvzxcv", name: "Sarah", team: "Manchester United" },
-  { id: "asdfasdf", name: "Robert", team: "Bayern Munich" },
+  { id: "qwe", name: "Alex", clubId: "1" },
+  { id: "asd", name: "David", clubId: "2" },
+  { id: "123", name: "Michael", clubId: "3" },
+  { id: "zxcvzxcv", name: "Sarah", clubId: "4" },
+  { id: "asdfasdf", name: "Robert", clubId: "5" },
 ];
 
 const clubs = [

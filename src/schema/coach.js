@@ -14,11 +14,10 @@ export const Coach = new GraphQLObjectType({
   fields: () => ({
     id: { type: new GraphQLNonNull(GraphQLID) },
     name: { type: new GraphQLNonNull(GraphQLString) },
-    team: {
+    club: {
       type: new GraphQLNonNull(Club),
       resolve: (coach, _, { db }) => {
-        const fullCoach = db.coaches.find((coachDb) => coachDb.id === coach.id);
-        return db.clubs.find((club) => fullCoach.team === club.name);
+        return db.clubs.find((club) => coach.clubId === club.id);
       },
     },
   }),

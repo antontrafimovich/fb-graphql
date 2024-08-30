@@ -48,8 +48,9 @@ const Query = new GraphQLObjectType({
       args: {
         club: { type: new GraphQLNonNull(GraphQLString) },
       },
-      resolve: (_, { club }, { db }) => {
-        return db.coaches.find((coach) => coach.team === club);
+      resolve: (_, { club: clubName }, { db }) => {
+        const club = db.clubs.find((club) => club.name === clubName);
+        return db.coaches.find((coach) => coach.clubId === club.id);
       },
     },
   },

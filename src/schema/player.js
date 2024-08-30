@@ -16,11 +16,10 @@ export const Player = new GraphQLObjectType({
     id: { type: new GraphQLNonNull(GraphQLID) },
     name: { type: new GraphQLNonNull(GraphQLString) },
     position: { type: new GraphQLNonNull(Position) },
-    team: { type: new GraphQLNonNull(GraphQLString) },
-    teamInfo: {
+    club: {
       type: new GraphQLNonNull(Club),
       resolve: (player, _, { db }) => {
-        return db.clubs.find((club) => club.name === player.team);
+        return db.clubs.find((club) => club.id === player.clubId);
       },
     },
   }),
