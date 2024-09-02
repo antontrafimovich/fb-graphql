@@ -42,8 +42,97 @@ const clubs = [
   },
 ];
 
+// write a database object, which will return data from the stub arrays by stub name with delay
 export const db = {
-  players,
-  coaches,
-  clubs,
+  players: {
+    getPlayers: () => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(players);
+        }, 1000); // Hardcoded delay of 1 second
+      });
+    },
+    getPlayerById: (id) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const player = players.find((p) => p.id === id);
+          resolve(player);
+        }, 1000); // Hardcoded delay of 1 second
+      });
+    },
+    getPlayersByClubId: (clubId) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const clubPlayers = players.filter((p) => p.clubId === clubId);
+          resolve(clubPlayers);
+        }, 1000); // Hardcoded delay of 1 second
+      });
+    },
+    getPlayerByName: (name) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const player = players.find((p) => p.name === name);
+          resolve(player);
+        }, 1000); // Hardcoded delay of 1 second
+      });
+    },
+  },
+  coaches: {
+    getCoaches: () => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(coaches);
+        }, 1000); // Hardcoded delay of 1 second
+      });
+    },
+    getCoachById: (id) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const coach = coaches.find((c) => c.id === id);
+          resolve(coach);
+        }, 1000); // Hardcoded delay of 1 second
+      });
+    },
+    getCoachByClubId: (clubId) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const clubCoach = coaches.find((c) => c.clubId === clubId);
+          resolve(clubCoach);
+        }, 1000); // Hardcoded delay of 1 second
+      });
+    },
+  },
+  clubs: {
+    getClubs: () => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(clubs);
+        }, 1000); // Hardcoded delay of 1 second
+      });
+    },
+    getClubById: (id) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const club = clubs.find((c) => c.id === id);
+          resolve(club);
+        }, 1000); // Hardcoded delay of 1 second
+      });
+    },
+    getClubByName: (name) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const club = clubs.find((c) => c.name === name);
+          resolve(club);
+        }, 1000); // Hardcoded delay of 1 second
+      });
+    },
+    getClubsByCountry: (country) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const countryClubs = clubs.filter((c) => c.country === country);
+          resolve(countryClubs);
+        }, 1000); // Hardcoded delay of 1 second
+      });
+    },
+  },
 };

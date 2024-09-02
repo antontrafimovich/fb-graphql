@@ -19,7 +19,7 @@ export const Player = new GraphQLObjectType({
     club: {
       type: new GraphQLNonNull(Club),
       resolve: (player, _, { db }) => {
-        return db.clubs.find((club) => club.id === player.clubId);
+        return db.clubs.getClubById(player.clubId);
       },
     },
   }),

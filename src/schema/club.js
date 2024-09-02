@@ -20,13 +20,13 @@ export const Club = new GraphQLObjectType({
     coach: {
       type: new GraphQLNonNull(Coach),
       resolve: (club, _, { db }) => {
-        return db.coaches.find((coach) => coach.clubId === club.id);
+        return db.coaches.getCoachByClubId(club.id);
       },
     },
     players: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Player))),
       resolve: (club, _, { db }) => {
-        return db.players.filter((player) => player.clubId === club.id);
+        return db.players.getPlayersByClubId(club.id);
       },
     },
   },

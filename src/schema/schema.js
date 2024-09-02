@@ -19,19 +19,19 @@ const Query = new GraphQLObjectType({
         name: { type: new GraphQLNonNull(GraphQLString) },
       },
       resolve: (_, { name }, { db }) => {
-        return db.players.find((player) => player.name === name);
+        return db.players.getPlayerByName(name);
       },
     },
     players: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Player))),
       resolve: (_, __, { db }) => {
-        return db.players;
+        return db.players.getPlayers();
       },
     },
     clubs: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Club))),
       resolve: (_, __, { db }) => {
-        return db.clubs;
+        return db.clubs.getClubs();
       },
     },
     club: {
@@ -40,7 +40,7 @@ const Query = new GraphQLObjectType({
         name: { type: new GraphQLNonNull(GraphQLString) },
       },
       resolve: (_, { name }, { db }) => {
-        return db.clubs.find((club) => club.name === name);
+        return db.clubs.getClubByName(name);
       },
     },
     coach: {
@@ -48,9 +48,9 @@ const Query = new GraphQLObjectType({
       args: {
         club: { type: new GraphQLNonNull(GraphQLString) },
       },
-      resolve: (_, { club: clubName }, { db }) => {
-        const club = db.clubs.find((club) => club.name === clubName);
-        return db.coaches.find((coach) => coach.clubId === club.id);
+      resolve: async (_, { club: clubName }, { db }) => {
+        const club = await db.clubs.getClubByName(clubName);
+        return db.coaches.getCoachByClubId(club.id);
       },
     },
   },
