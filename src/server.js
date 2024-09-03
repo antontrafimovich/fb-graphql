@@ -3,8 +3,27 @@ import { createServer } from "node:http";
 
 import { schema } from "./schema/schema.js";
 import { db } from "./db/db.js";
+import { process } from "node:process";
+
+let connectedDb;
+try {
+  connectedDb = await db.connect();
+} catch (err) {
+  console.error("Failed to connect to the database");
+  console.error(err);
+  process.exit(1);
+}
 
 createServer((req, res) => {
+  if (!connectedDb) {
+    res.writeHead(500, {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    });
+    res.end(JSON.stringify({ error: "Failed to connect to the database" }));
+    return;
+  }
+
   if (req.method === "POST" && req.url === "/graphql") {
     let query = "";
 
@@ -17,7 +36,7 @@ createServer((req, res) => {
       graphql({
         schema,
         source: source.query,
-        contextValue: { db },
+        contextValue: { db: connectedDb },
         variableValues: source.variables,
       }).then((response) => {
         res.writeHead(200, {
@@ -28,4 +47,6 @@ createServer((req, res) => {
       });
     });
   }
-}).listen(3000, "0.0.0.0");
+}).listen(3000, "0.0.0.0", () => {
+  console.log("Server is running on http://localhost:3000");
+});
