@@ -34,6 +34,7 @@ export const startServer = async (port = 3000) => {
         });
 
         req.on("end", () => {
+          console.log(query);
           const source = JSON.parse(query);
           graphql({
             schema,
@@ -48,6 +49,15 @@ export const startServer = async (port = 3000) => {
             res.end(JSON.stringify(response));
           });
         });
+      }
+
+      if (req.url === '/graphql' && req.method === 'OPTIONS') {
+        res.writeHead(200, {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST',
+          'Access-Control-Allow-Headers': 'Content-Type',
+        });
+        res.end();
       }
     });
 

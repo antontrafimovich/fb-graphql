@@ -5,7 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start:api": "pnpm --filter api start"
+    "start:api": "pnpm --filter api start",
+    "start:fe": "pnpm --filter frontend start"
   },
   "keywords": [],
   "author": "",
