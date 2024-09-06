@@ -5,32 +5,6 @@ import { useEffect, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 
-// const getPlayers = async () => {
-//   const response = await fetch("http://localhost:3000/graphql", {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify({
-//       query: `
-//         query Player($name: String!) {
-//           player(name: $name) {
-//             id
-//             name
-//             position
-//             club {
-//               name
-//             }
-//           }
-//         }
-//       `,
-//       variables: {
-//         name: "Anton",
-//       },
-//     }),
-//   });
-
-//   return response.json();
-// };
-
 const uploadPlayers = async () => {
   const formData = new FormData();
 
