@@ -6,5 +6,6 @@ export const Position = new GraphQLEnumType({
     Defender: { value: "Defender" },
     Midfielder: { value: "Midfielder" },
     Forward: { value: "Forward" },
+    Goalkeeper: { value: "Goalkeeper" },
   },
 });

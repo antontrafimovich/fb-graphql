@@ -1,4 +1,5 @@
 import {
+  GraphQLInputObjectType,
   GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
@@ -9,6 +10,7 @@ import {
 import { Club } from "./club.js";
 import { Coach } from "./coach.js";
 import { Player } from "./player.js";
+import { Position } from "./position.js";
 
 const Query = new GraphQLObjectType({
   name: "Query",
@@ -56,6 +58,37 @@ const Query = new GraphQLObjectType({
   },
 });
 
+const Muatation = new GraphQLObjectType({
+  name: "Mutation",
+  fields: {
+    addPlayers: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Player))),
+      args: {
+        players: {
+          type: new GraphQLNonNull(
+            new GraphQLList(
+              new GraphQLNonNull(
+                new GraphQLInputObjectType({
+                  name: "AddPlayerInput",
+                  fields: {
+                    name: { type: new GraphQLNonNull(GraphQLString) },
+                    position: { type: new GraphQLNonNull(Position) },
+                    club: { type: new GraphQLNonNull(GraphQLString) },
+                  },
+                })
+              )
+            )
+          ),
+        },
+      },
+      resolve: (_, { players }, { db }) => {
+        return db.players.addPlayers(players);
+      },
+    },
+  },
+});
+
 export const schema = new GraphQLSchema({
   query: Query,
+  mutation: Muatation,
 });

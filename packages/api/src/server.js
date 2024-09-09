@@ -1,13 +1,39 @@
+import { parse } from "csv-parse";
 import { graphql } from "graphql";
+import multer from "multer";
 import { createServer } from "node:http";
 import process from "node:process";
 
 import { db } from "./db/db.js";
 import { schema } from "./schema/schema.js";
-import multer from "multer";
 
 const upload = multer();
 const uploadHandler = upload.fields([{ name: "0" }]);
+
+const parser = parse({ delimiter: ",", columns: true });
+
+const parseCsv = async (csv) => {
+  return new Promise((resolve, reject) => {
+    let data = [];
+
+    parser.on("data", (row) => {
+      console.log(row);
+      data.push(row);
+    });
+
+    parser.on("error", (err) => {
+      reject(err);
+    });
+
+    parser.on("end", () => {
+      console.log("parse finished", data);
+      resolve(data);
+    });
+
+    parser.write(csv);
+    parser.end();
+  });
+};
 
 export const startServer = async (port = 3000) => {
   let connectedDb;
@@ -39,7 +65,6 @@ export const startServer = async (port = 3000) => {
           });
 
           req.on("end", () => {
-            console.log(query);
             const source = JSON.parse(query);
             graphql({
               schema,
@@ -57,7 +82,7 @@ export const startServer = async (port = 3000) => {
         }
 
         if (req.headers["content-type"].startsWith("multipart/form-data")) {
-          uploadHandler(req, res, (err) => {
+          uploadHandler(req, res, async (err) => {
             if (err) {
               res.writeHead(500, {
                 "Content-Type": "application/json",
@@ -69,17 +94,19 @@ export const startServer = async (port = 3000) => {
 
             const variables = JSON.parse(req.body.variables);
 
+            const result = await parseCsv(req.files[0][0].buffer);
+
             const mappedVariables = Object.entries(variables).reduce(
               (acc, [key, value]) => {
-                acc[key] = req.files[value][0]
+                acc[key] = result;
                 return acc;
               },
               {}
             );
 
-            const source = JSON.parse(req.body.operations);
+            console.log(mappedVariables);
 
-            console.log(source, mappedVariables.file);
+            const source = JSON.parse(req.body.operations);
 
             return graphql({
               source: source.query,

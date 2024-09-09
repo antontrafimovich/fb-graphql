@@ -56,6 +56,14 @@ export const db = {
                 }, 1000); // Hardcoded delay of 1 second
               });
             },
+            addPlayers: (newPlayers) => {
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  players.push(...newPlayers);
+                  resolve(newPlayers);
+                }, 1000); // Hardcoded delay of 1 second
+              });
+            },
             getPlayerById: (id) => {
               return new Promise((resolve) => {
                 setTimeout(() => {
