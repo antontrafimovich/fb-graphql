@@ -5,16 +5,28 @@ import {
   GraphQLObjectType,
   GraphQLSchema,
   GraphQLString,
+  GraphQLID,
 } from "graphql";
 
 import { Club } from "./club.js";
 import { Coach } from "./coach.js";
+import { User } from "./user.js";
 import { Player } from "./player.js";
 import { Position } from "./position.js";
+import userService from "../service/user-service.js";
 
 const Query = new GraphQLObjectType({
   name: "Query",
   fields: {
+    user: {
+      type: new GraphQLNonNull(User),
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      resolve: (_, { id }, { db }) => {
+        return userService.getUserById(db, id);
+      },
+    },
     player: {
       type: new GraphQLNonNull(Player),
       args: {
