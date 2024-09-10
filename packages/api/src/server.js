@@ -97,14 +97,12 @@ export const startServer = async (port = 3000) => {
             const result = await parseCsv(req.files[0][0].buffer);
 
             const mappedVariables = Object.entries(variables).reduce(
-              (acc, [key, value]) => {
+              (acc, [key]) => {
                 acc[key] = result;
                 return acc;
               },
               {}
             );
-
-            console.log(mappedVariables);
 
             const source = JSON.parse(req.body.operations);
 
@@ -146,5 +144,7 @@ export const startServer = async (port = 3000) => {
         port: server.address().port,
       });
     });
+
+    return server;
   });
 };
