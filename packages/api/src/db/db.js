@@ -14,6 +14,12 @@ const coaches = [
   { id: "asdfasdf", name: "Robert", clubId: "5" },
 ];
 
+const users = [
+  { id: "1", name: "John", email: "john@gmail.com" },
+  { id: "2", name: "Mike", email: "john@gmail.com" },
+  { id: "3", name: "David", email: "david@gmail.com" },
+];
+
 const clubs = [
   {
     id: "1",
@@ -87,6 +93,33 @@ export const db = {
                 setTimeout(() => {
                   const player = players.find((p) => p.name === name);
                   resolve(player);
+                }, 1000); // Hardcoded delay of 1 second
+              });
+            },
+          },
+          users: {
+            getUserById: (id) => {
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  const user = users.find((u) => u.id === id);
+                  resolve(user);
+                }, 1000); // Hardcoded delay of 1 second
+              });
+            },
+            getUserByEmail: (email) => {
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  const user = users.find((u) => u.email === email);
+                  resolve(user);
+                }, 1000); // Hardcoded delay of 1 second
+              });
+            },
+            createUser: (name, email) => {
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  const user = { id: String(users.length + 1), name, email };
+                  users.push(user);
+                  resolve(user);
                 }, 1000); // Hardcoded delay of 1 second
               });
             },
