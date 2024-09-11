@@ -15,9 +15,9 @@ const coaches = [
 ];
 
 const users = [
-  { id: "1", name: "John", email: "john@gmail.com" },
-  { id: "2", name: "Mike", email: "john@gmail.com" },
-  { id: "3", name: "David", email: "david@gmail.com" },
+  { id: "1", name: "John", email: "john@gmail.com", password: "123" },
+  { id: "2", name: "Mike", email: "john@gmail.com", password: "456" },
+  { id: "3", name: "David", email: "david@gmail.com", password: "789" },
 ];
 
 const clubs = [
@@ -47,6 +47,8 @@ const clubs = [
     country: "Germany",
   },
 ];
+
+const sessions = [];
 
 // write a database object, which will return data from the stub arrays by stub name with delay
 export const db = {
@@ -120,6 +122,42 @@ export const db = {
                   const user = { id: String(users.length + 1), name, email };
                   users.push(user);
                   resolve(user);
+                }, 1000); // Hardcoded delay of 1 second
+              });
+            },
+          },
+          sessions: {
+            createSession: (userId) => {
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  const session = { id: String(sessions.length + 1), userId };
+                  sessions.push(session);
+                  resolve(session);
+                }, 1000); // Hardcoded delay of 1 second
+              });
+            },
+            getSessionById: (id) => {
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  const session = sessions.find((s) => s.id === id);
+                  resolve(session);
+                }, 1000); // Hardcoded delay of 1 second
+              });
+            },
+            getSessionByUserId: (userId) => {
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  const session = sessions.find((s) => s.userId === userId);
+                  resolve(session);
+                }, 1000); // Hardcoded delay of 1 second
+              });
+            },
+            removeSession: (id) => {
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  const index = sessions.findIndex((s) => s.id === id);
+                  sessions.splice(index, 1);
+                  resolve();
                 }, 1000); // Hardcoded delay of 1 second
               });
             },
