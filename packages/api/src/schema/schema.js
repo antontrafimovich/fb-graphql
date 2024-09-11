@@ -1,19 +1,21 @@
 import {
+  GraphQLID,
   GraphQLInputObjectType,
   GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
   GraphQLSchema,
   GraphQLString,
-  GraphQLID,
+  GraphQLUnionType,
 } from "graphql";
 
+import authService from "../service/auth-service.js";
+import userService from "../service/user-service.js";
 import { Club } from "./club.js";
 import { Coach } from "./coach.js";
-import { User } from "./user.js";
 import { Player } from "./player.js";
 import { Position } from "./position.js";
-import userService from "../service/user-service.js";
+import { User } from "./user.js";
 
 const Query = new GraphQLObjectType({
   name: "Query",
@@ -70,6 +72,26 @@ const Query = new GraphQLObjectType({
   },
 });
 
+const LoginResponseType = new GraphQLUnionType({
+  name: "LoginResponseType",
+  types: [
+    new GraphQLObjectType({
+      name: "Session",
+      fields: {
+        session: { type: GraphQLString },
+      },
+      isTypeOf: (value) => "session" in value,
+    }),
+    new GraphQLObjectType({
+      name: "Error",
+      fields: {
+        message: { type: GraphQLString },
+      },
+      isTypeOf: (value) => "message" in value,
+    }),
+  ],
+});
+
 const Muatation = new GraphQLObjectType({
   name: "Mutation",
   fields: {
@@ -95,6 +117,31 @@ const Muatation = new GraphQLObjectType({
       },
       resolve: (_, { players }, { db }) => {
         return db.players.addPlayers(players);
+      },
+    },
+    login: {
+      type: LoginResponseType,
+      args: {
+        email: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async (_, { email, password }, { db, res }) => {
+        const session = await authService.login(db, { email, password });
+
+        if (session === null) {
+          return {
+            message: "Invalid email or password",
+          };
+        }
+
+        const headers = new Headers({
+          "Set-Cookie": `session=${session}; HttpOnly`,
+          "Access-Control-Allow-Credentials": "true",
+        });
+
+        res.setHeaders(headers);
+
+        return { session };
       },
     },
   },
