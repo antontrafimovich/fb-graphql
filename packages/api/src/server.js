@@ -69,7 +69,7 @@ export const startServer = async (port = 3000) => {
             graphql({
               schema,
               source: source.query,
-              contextValue: { db: connectedDb },
+              contextValue: { db: connectedDb, res },
               variableValues: source.variables,
             }).then((response) => {
               res.writeHead(200, {
@@ -109,7 +109,7 @@ export const startServer = async (port = 3000) => {
             return graphql({
               source: source.query,
               schema,
-              contextValue: { db: connectedDb },
+              contextValue: { db: connectedDb, res },
               variableValues: mappedVariables,
             }).then((response) => {
               res.writeHead(200, {
