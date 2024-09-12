@@ -135,7 +135,7 @@ const Muatation = new GraphQLObjectType({
         }
 
         const headers = new Headers({
-          "Set-Cookie": `session=${session}; HttpOnly`,
+          "Set-Cookie": `session=${session}; HttpOnly; SameSite=None; Secure`,
           "Access-Control-Allow-Credentials": "true",
         });
 

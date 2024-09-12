@@ -6,6 +6,7 @@ import process from "node:process";
 
 import { db } from "./db/db.js";
 import { schema } from "./schema/schema.js";
+import sessionService from "./service/session-service.js";
 
 const upload = multer();
 const uploadHandler = upload.fields([{ name: "0" }]);
@@ -46,14 +47,29 @@ export const startServer = async (port = 3000) => {
   }
 
   return new Promise((resolve) => {
-    const server = createServer((req, res) => {
+    const server = createServer(async (req, res) => {
+      let context = { res, db: connectedDb };
       if (!connectedDb) {
         res.writeHead(500, {
           "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Origin": "http://localhost:5173",
+          "Access-Control-Allow-Credentials": true,
         });
         res.end(JSON.stringify({ error: "Failed to connect to the database" }));
         return;
+      }
+
+      const cookie = req.headers.cookie;
+      console.log(req.headers)
+      if (cookie) {
+        console.log("cookie", cookie);
+        const session = cookie.split("=")[1];
+        const user = await sessionService.getUserBySession(
+          connectedDb,
+          session
+        );
+
+        context = { ...context, user };
       }
 
       if (req.method === "POST" && req.url === "/graphql") {
@@ -69,12 +85,13 @@ export const startServer = async (port = 3000) => {
             graphql({
               schema,
               source: source.query,
-              contextValue: { db: connectedDb, res },
+              contextValue: context,
               variableValues: source.variables,
             }).then((response) => {
               res.writeHead(200, {
                 "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Origin": "http://localhost:5173",
+                "Access-Control-Allow-Credentials": true,
               });
               res.end(JSON.stringify(response));
             });
@@ -86,7 +103,8 @@ export const startServer = async (port = 3000) => {
             if (err) {
               res.writeHead(500, {
                 "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Origin": "http://localhost:5173",
+                "Access-Control-Allow-Credentials": true,
               });
               res.end(JSON.stringify({ error: "Failed to parse the file" }));
               return;
@@ -109,12 +127,13 @@ export const startServer = async (port = 3000) => {
             return graphql({
               source: source.query,
               schema,
-              contextValue: { db: connectedDb, res },
+              contextValue: context,
               variableValues: mappedVariables,
             }).then((response) => {
               res.writeHead(200, {
                 "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Origin": "http://localhost:5173",
+                "Access-Control-Allow-Credentials": true,
               });
               res.end(JSON.stringify(response));
             });
@@ -126,7 +145,8 @@ export const startServer = async (port = 3000) => {
 
       if (req.url === "/graphql" && req.method === "OPTIONS") {
         res.writeHead(200, {
-          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Origin": "http://localhost:5173",
+          "Access-Control-Allow-Credentials": true,
           "Access-Control-Allow-Methods": "POST",
           "Access-Control-Allow-Headers": "Content-Type",
         });
