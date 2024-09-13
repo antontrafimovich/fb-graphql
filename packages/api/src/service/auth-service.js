@@ -1,5 +1,14 @@
-import sessionService from "./session-service.js";
+// import sessionService from "./session-service.js";
 import userService from "./user-service.js";
+import crypto from "node:crypto";
+
+const toBase64 = (str) => {
+  return Buffer.from(str)
+    .toString("base64")
+    .replace(/=/g, "")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_");
+};
 
 export default {
   login: async (db, { email, password }) => {
@@ -12,14 +21,18 @@ export default {
       return null;
     }
 
-    const activeSession = await sessionService.getSessionByUserId(db, user.id);
+    const jwtHeader = toBase64(JSON.stringify({ alg: "HS256", typ: "JWT" }));
 
-    if (activeSession) {
-      return activeSession.id;
-    }
+    const jwtPayload = toBase64(JSON.stringify({ email, password }));
 
-    const session = await sessionService.createSession(db, user.id);
+    const signature = crypto
+      .createHmac("sha256", "VERY_SECRET_STRING")
+      .update(`${jwtHeader}.${jwtPayload}`)
+      .digest("base64")
+      .replace(/=/g, "")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_");
 
-    return session.id;
+    return `${jwtHeader}.${jwtPayload}.${signature}`;
   },
 };

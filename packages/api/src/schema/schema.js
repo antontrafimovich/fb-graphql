@@ -76,11 +76,11 @@ const LoginResponseType = new GraphQLUnionType({
   name: "LoginResponseType",
   types: [
     new GraphQLObjectType({
-      name: "Session",
+      name: "Token",
       fields: {
-        session: { type: GraphQLString },
+        token: { type: GraphQLString },
       },
-      isTypeOf: (value) => "session" in value,
+      isTypeOf: (value) => "token" in value,
     }),
     new GraphQLObjectType({
       name: "Error",
@@ -125,23 +125,16 @@ const Muatation = new GraphQLObjectType({
         email: { type: new GraphQLNonNull(GraphQLString) },
         password: { type: new GraphQLNonNull(GraphQLString) },
       },
-      resolve: async (_, { email, password }, { db, res }) => {
-        const session = await authService.login(db, { email, password });
+      resolve: async (_, { email, password }, { db }) => {
+        const token = await authService.login(db, { email, password });
 
-        if (session === null) {
+        if (token === null) {
           return {
             message: "Invalid email or password",
           };
         }
 
-        const headers = new Headers({
-          "Set-Cookie": `session=${session}; HttpOnly; SameSite=None; Secure`,
-          "Access-Control-Allow-Credentials": "true",
-        });
-
-        res.setHeaders(headers);
-
-        return { session };
+        return { token };
       },
     },
   },

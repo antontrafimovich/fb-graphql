@@ -60,7 +60,6 @@ export const startServer = async (port = 3000) => {
       }
 
       const cookie = req.headers.cookie;
-      console.log(req.headers)
       if (cookie) {
         console.log("cookie", cookie);
         const session = cookie.split("=")[1];
