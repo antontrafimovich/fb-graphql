@@ -18,8 +18,8 @@ export const Login = () => {
             query: `
             mutation Login($email: String!, $password: String!) {
               login(email: $email, password: $password) {
-                ... on Session {
-                  session
+                ... on Token {
+                  token
                 }
               }
             }
@@ -33,7 +33,9 @@ export const Login = () => {
 
         const result = await response.json();
 
-        console.log(result);
+        localStorage.setItem("token", result.data.login.token);
+
+        window.location.reload();
       }}
     >
       <input type="text" id="login" name="login" value="john@gmail.com" />

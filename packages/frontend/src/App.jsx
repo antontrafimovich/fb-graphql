@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import { Login } from "./Login";
 
@@ -7,6 +7,7 @@ const loadPlayers = () => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
     body: JSON.stringify({
       query: `
@@ -20,7 +21,7 @@ const loadPlayers = () => {
   }).then((response) => response.json());
 };
 
-function App() {
+function Players() {
   const [players, setPlayers] = useState([]);
 
   useEffect(() => {
@@ -31,13 +32,26 @@ function App() {
 
   return (
     <ul>
-      <Login />
       <li>
         {players.map((player) => {
           return player.name;
         })}
       </li>
     </ul>
+  );
+}
+
+function App() {
+  const token = useMemo(() => {
+    return localStorage.getItem("token");
+  }, []);
+
+  return (
+    <>
+      {!token && <Login />}
+
+      {token && <Players />}
+    </>
   );
 }
 
