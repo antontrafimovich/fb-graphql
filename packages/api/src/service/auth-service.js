@@ -23,7 +23,7 @@ export default {
 
     const jwtHeader = toBase64(JSON.stringify({ alg: "HS256", typ: "JWT" }));
 
-    const jwtPayload = toBase64(JSON.stringify({ email, password }));
+    const jwtPayload = toBase64(JSON.stringify({ userId: user.id }));
 
     const signature = crypto
       .createHmac("sha256", "VERY_SECRET_STRING")
@@ -34,5 +34,30 @@ export default {
       .replace(/\//g, "_");
 
     return `${jwtHeader}.${jwtPayload}.${signature}`;
+  },
+
+  validateToken: (token) => {
+    if (!token) {
+      return null;
+    }
+
+    const [jwtHeader, jwtPayload, signature] = token.split(".");
+
+    const incomingDataSignature = crypto
+      .createHmac("sha256", "VERY_SECRET_STRING")
+      .update(`${jwtHeader}.${jwtPayload}`)
+      .digest("base64")
+      .replace(/=/g, "")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_");
+
+    if (signature !== incomingDataSignature) {
+      return null;
+    }
+
+    const stringJwtPayload = Buffer.from(jwtPayload, "base64").toString(
+      "utf-8"
+    );
+    return JSON.parse(stringJwtPayload);
   },
 };
