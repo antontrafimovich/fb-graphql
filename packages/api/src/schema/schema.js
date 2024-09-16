@@ -10,6 +10,7 @@ import {
 } from "graphql";
 
 import authService from "../service/auth-service.js";
+import playerService from "../service/player-service.js";
 import userService from "../service/user-service.js";
 import { Club } from "./club.js";
 import { Coach } from "./coach.js";
@@ -34,14 +35,14 @@ const Query = new GraphQLObjectType({
       args: {
         name: { type: new GraphQLNonNull(GraphQLString) },
       },
-      resolve: (_, { name }, { db }) => {
-        return db.players.getPlayerByName(name);
+      resolve: (_, { name }, { db, user }) => {
+        return playerService.getPlayerByName(user, db, name);
       },
     },
     players: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Player))),
-      resolve: (_, __, { db }) => {
-        return db.players.getPlayers();
+      resolve: (_, __, { db, user }) => {
+        return playerService.getPlayers(user, db);
       },
     },
     clubs: {
