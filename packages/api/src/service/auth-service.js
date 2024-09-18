@@ -1,6 +1,7 @@
 // import sessionService from "./session-service.js";
-import userService from "./user-service.js";
 import crypto from "node:crypto";
+
+import userService from "./user-service.js";
 
 const toBase64 = (str) => {
   return Buffer.from(str)
@@ -8,6 +9,51 @@ const toBase64 = (str) => {
     .replace(/=/g, "")
     .replace(/\+/g, "-")
     .replace(/\//g, "_");
+};
+
+const generateToken = (payload) => {
+  const jwtHeader = toBase64(JSON.stringify({ alg: "HS256", typ: "JWT" }));
+
+  const jwtPayload = toBase64(JSON.stringify(payload));
+
+  const signature = crypto
+    .createHmac("sha256", "VERY_SECRET_STRING")
+    .update(`${jwtHeader}.${jwtPayload}`)
+    .digest("base64")
+    .replace(/=/g, "")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_");
+
+  return `${jwtHeader}.${jwtPayload}.${signature}`;
+};
+
+const validateToken = (token) => {
+  if (!token) {
+    return null;
+  }
+
+  const [jwtHeader, jwtPayload, signature] = token.split(".");
+
+  const incomingDataSignature = crypto
+    .createHmac("sha256", "VERY_SECRET_STRING")
+    .update(`${jwtHeader}.${jwtPayload}`)
+    .digest("base64")
+    .replace(/=/g, "")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_");
+
+  if (signature !== incomingDataSignature) {
+    return null;
+  }
+
+  const stringJwtPayload = Buffer.from(jwtPayload, "base64").toString("utf-8");
+  const jwtPayloadObj = JSON.parse(stringJwtPayload);
+
+  if (jwtPayloadObj.exp < Date.now()) {
+    return null;
+  }
+
+  return jwtPayloadObj;
 };
 
 export default {
@@ -21,43 +67,33 @@ export default {
       return null;
     }
 
-    const jwtHeader = toBase64(JSON.stringify({ alg: "HS256", typ: "JWT" }));
+    const accessToken = generateToken({
+      userId: user.id,
+      exp: Date.now() + 1000 * 20,
+    });
 
-    const jwtPayload = toBase64(JSON.stringify({ userId: user.id }));
+    const refreshToken = generateToken({
+      userId: user.id,
+      exp: Date.now() + 1000 * 60 * 60 * 24,
+    });
 
-    const signature = crypto
-      .createHmac("sha256", "VERY_SECRET_STRING")
-      .update(`${jwtHeader}.${jwtPayload}`)
-      .digest("base64")
-      .replace(/=/g, "")
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_");
-
-    return `${jwtHeader}.${jwtPayload}.${signature}`;
+    return { accessToken, refreshToken };
   },
 
-  validateToken: (token) => {
-    if (!token) {
+  validateToken,
+
+  refreshToken: (refreshToken) => {
+    const validationResult = validateToken(refreshToken);
+
+    if (!validationResult) {
       return null;
     }
 
-    const [jwtHeader, jwtPayload, signature] = token.split(".");
+    const accessToken = generateToken({
+      userId: validationResult.userId,
+      exp: Date.now() + 1000 * 20,
+    });
 
-    const incomingDataSignature = crypto
-      .createHmac("sha256", "VERY_SECRET_STRING")
-      .update(`${jwtHeader}.${jwtPayload}`)
-      .digest("base64")
-      .replace(/=/g, "")
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_");
-
-    if (signature !== incomingDataSignature) {
-      return null;
-    }
-
-    const stringJwtPayload = Buffer.from(jwtPayload, "base64").toString(
-      "utf-8"
-    );
-    return JSON.parse(stringJwtPayload);
+    return accessToken;
   },
 };
