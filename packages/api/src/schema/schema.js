@@ -6,7 +6,6 @@ import {
   GraphQLObjectType,
   GraphQLSchema,
   GraphQLString,
-  GraphQLUnionType,
 } from "graphql";
 
 import authService from "../service/auth-service.js";
@@ -73,24 +72,19 @@ const Query = new GraphQLObjectType({
   },
 });
 
-const LoginResponseType = new GraphQLUnionType({
+const LoginResponseType = new GraphQLObjectType({
   name: "LoginResponseType",
-  types: [
-    new GraphQLObjectType({
-      name: "Token",
-      fields: {
-        token: { type: GraphQLString },
-      },
-      isTypeOf: (value) => "token" in value,
-    }),
-    new GraphQLObjectType({
-      name: "Error",
-      fields: {
-        message: { type: GraphQLString },
-      },
-      isTypeOf: (value) => "message" in value,
-    }),
-  ],
+  fields: {
+    refreshToken: { type: new GraphQLNonNull(GraphQLString) },
+    accessToken: { type: new GraphQLNonNull(GraphQLString) },
+  },
+});
+
+const RefreshTokenResponseType = new GraphQLObjectType({
+  name: "RefreshTokenResponseType",
+  fields: {
+    accessToken: { type: new GraphQLNonNull(GraphQLString) },
+  },
 });
 
 const Muatation = new GraphQLObjectType({
@@ -127,15 +121,24 @@ const Muatation = new GraphQLObjectType({
         password: { type: new GraphQLNonNull(GraphQLString) },
       },
       resolve: async (_, { email, password }, { db }) => {
-        const token = await authService.login(db, { email, password });
+        const tokens = await authService.login(db, { email, password });
 
-        if (token === null) {
+        if (tokens === null) {
           return {
             message: "Invalid email or password",
           };
         }
 
-        return { token };
+        return tokens;
+      },
+    },
+    refreshToken: {
+      type: RefreshTokenResponseType,
+      args: {
+        refreshToken: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: (_, { refreshToken }) => {
+        return {accessToken: authService.refreshToken(refreshToken)};
       },
     },
   },
