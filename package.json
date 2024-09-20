@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "start:api": "pnpm --filter api start",
+    "start:apollo": "pnpm --filter apollo-api start",
     "start:fe": "pnpm --filter frontend start"
   },
   "keywords": [],
