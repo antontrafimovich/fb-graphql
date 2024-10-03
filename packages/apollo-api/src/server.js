@@ -1,5 +1,6 @@
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
+import { GraphQLError } from "graphql";
 
 // create players using structure described in the schema
 const players = [
@@ -45,6 +46,18 @@ const coaches = [
   },
 ];
 
+const getDbConnection = () => {
+  // connect to the database
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        getCoaches: () => coaches,
+        getPlayers: () => players,
+      });
+    }, 3000);
+  });
+};
+
 export const createServer = async () => {
   const typeDefs = `#graphql
     enum Position {
@@ -88,22 +101,22 @@ export const createServer = async () => {
   const resolvers = {
     TeamStuff: {
       __resolveType: (stuff) => {
-        // if (stuff.position) {
-        //   return 'Player';
-        // }
+        if (stuff.position) {
+          return "Player";
+        }
 
-        return 'Coach';
-      }
+        return "Coach";
+      },
     },
     Query: {
-      players: (_, args) => {
+      players: (_, args, { db }) => {
         if (!args || !args.q) {
           return players;
         }
 
         const { minAge, position } = args.q;
 
-        return players.filter((player) => {
+        return db.getPlayers().filter((player) => {
           let pass = true;
 
           if (minAge !== undefined && minAge !== null) {
@@ -117,8 +130,19 @@ export const createServer = async () => {
           return pass;
         });
       },
-      teamStuff: (_, { team }) => {
-        return [{name: 'anton', gender: 'male'}];
+      teamStuff: (_, { team }, { db }) => {
+        throw new GraphQLError("You are not allowed to access this resource", {
+          extensions: {
+            code: "UNATHORIZED",
+            http: {
+              status: 400,
+            },
+          },
+        });
+        // });
+        // return [...db.getPlayers(), ...db.getCoaches()].filter(
+        //   (stuff) => stuff.team === team
+        // );
       },
     },
   };
@@ -128,8 +152,22 @@ export const createServer = async () => {
     resolvers,
   });
 
+  console.log("connecting to db");
+  let db;
+  try {
+    db = await getDbConnection();
+  } catch (err) {
+    console.error("Failed to connect to db", err);
+    process.exit(1);
+  }
+
   const { url } = await startStandaloneServer(server, {
     listen: { port: 4000 },
+    context: async () => {
+      return {
+        db,
+      };
+    },
   });
 
   console.log(`Server ready is running at ${url}`);
