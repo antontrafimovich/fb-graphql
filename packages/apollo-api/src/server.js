@@ -95,6 +95,7 @@ export const createServer = async () => {
     type Query {
       teamStuff(team: String!): [TeamStuff!]
       players(q: PlayerQueryInput): [Player!]
+      player(id: ID!): Player
     }
   `;
 
@@ -129,6 +130,9 @@ export const createServer = async () => {
 
           return pass;
         });
+      },
+      player: (_, { id }, { db }) => {
+        return db.getPlayers().find((player) => player.id === id);
       },
       teamStuff: (_, { team }, { db }) => {
         throw new GraphQLError("You are not allowed to access this resource", {
