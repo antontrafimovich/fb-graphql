@@ -6,7 +6,7 @@ import { GraphQLError } from "graphql";
 const players = [
   {
     id: "1",
-    name: "John Doe",
+    name: "Hello Doe",
     team: "Team 1",
     age: 21,
     position: "Forward",
@@ -46,16 +46,26 @@ const coaches = [
   },
 ];
 
-const getDbConnection = () => {
-  // connect to the database
+function pause(ms) {
   return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        getCoaches: () => coaches,
-        getPlayers: () => players,
-      });
-    }, 3000);
+    setTimeout(resolve, ms);
   });
+}
+
+const getDbConnection = async () => {
+  // connect to the database
+  await pause(3000);
+
+  return {
+    getCoaches: async () => {
+      await pause(1000);
+      return coaches;
+    },
+    getPlayers: async () => {
+      await pause(3000);
+      return players;
+    },
+  }
 };
 
 export const createServer = async () => {
@@ -110,14 +120,14 @@ export const createServer = async () => {
       },
     },
     Query: {
-      players: (_, args, { db }) => {
+      players: async (_, args, { db }) => {
         if (!args || !args.q) {
-          return players;
+          return db.getPlayers();
         }
 
         const { minAge, position } = args.q;
 
-        return db.getPlayers().filter((player) => {
+        return (await db.getPlayers()).filter((player) => {
           let pass = true;
 
           if (minAge !== undefined && minAge !== null) {
