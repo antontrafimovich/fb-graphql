@@ -5,6 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "start": "concurrently \"pnpm run start:apollo\" \"pnpm run start:next-fe\"",
     "start:api": "pnpm --filter api start",
     "start:apollo": "pnpm --filter apollo-api start",
     "start:fe": "pnpm --filter frontend start",
@@ -12,5 +13,8 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
 }
