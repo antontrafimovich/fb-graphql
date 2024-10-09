@@ -31,6 +31,17 @@ export default function Nav() {
             Players
           </Link>
         </li>
+        <li>
+          <Link
+            href="/today"
+            className={classNames([
+              "text-white",
+              pathname === "/today" && "underline",
+            ])}
+          >
+            Today
+          </Link>
+        </li>
       </ul>
     </nav>
   );

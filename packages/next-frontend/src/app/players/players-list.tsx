@@ -1,5 +1,4 @@
-"use client";
-
+import Link from "next/link";
 import { Player } from "./shared/model/player";
 
 export default function PlayersList({ players }: { players: Player[] }) {
@@ -7,7 +6,7 @@ export default function PlayersList({ players }: { players: Player[] }) {
     <ul>
       {players.map((player) => (
         <li key={player.id}>
-          <a href={`/players/${player.id}`}>{player.name}</a>
+          <Link href={`/players/${player.id}`}>{player.name}</Link>
         </li>
       ))}
     </ul>
