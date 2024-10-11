@@ -6,6 +6,7 @@ import classNames from "classnames";
 
 export default function Nav() {
   const pathname = usePathname();
+  
   return (
     <nav className="bg-slate-800 p-4">
       <ul className="flex gap-6">

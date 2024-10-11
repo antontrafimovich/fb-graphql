@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "concurrently \"pnpm run start:apollo\" \"pnpm run start:next-fe\"",
+    "start": "concurrently \"pnpm start:apollo\" \"pnpm start:next-fe\"",
     "start:api": "pnpm --filter api start",
     "start:apollo": "pnpm --filter apollo-api start",
     "start:fe": "pnpm --filter frontend start",
