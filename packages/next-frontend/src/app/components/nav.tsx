@@ -43,6 +43,17 @@ export default function Nav() {
             Today
           </Link>
         </li>
+        <li>
+          <Link
+            href="/feed"
+            className={classNames([
+              "text-white",
+              pathname === "/feed" && "underline",
+            ])}
+          >
+            Feed
+          </Link>
+        </li>
       </ul>
 
       <Link href="/login">Login</Link>
