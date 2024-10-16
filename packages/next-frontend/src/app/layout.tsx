@@ -23,9 +23,11 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
   auth,
+  feed,
 }: Readonly<{
   children: React.ReactNode;
   auth: React.ReactNode;
+  feed: React.ReactNode;
 }>) {
   return (
     <html lang="en">
@@ -35,8 +37,9 @@ export default function RootLayout({
         <header className="bg-slate-800 text-white">
           <Nav />
         </header>
-        <div>{auth}</div>
         <div>{children}</div>
+        <div>{auth}</div>
+        <div>{feed}</div>
       </body>
     </html>
   );
