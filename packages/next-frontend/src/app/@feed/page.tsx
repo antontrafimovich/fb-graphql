@@ -1,8 +1,14 @@
-export default function Feed() {
+import Link from "next/link";
+import data from "../data/jokes.json";
+
+export default function Page() {
   return (
-    <div>
-      <h1>This is the Feed page!</h1>
-      <div>Here gonna be some latest news</div>
-    </div>
+    <ul>
+      {data.jokes.map((joke, index) => (
+        <li key={index}>
+          <Link href={`/jokes/${index}`}>{index}</Link>
+        </li>
+      ))}
+    </ul>
   );
 }

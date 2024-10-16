@@ -1,7 +1,3 @@
-export default function DefaultFeed() {
-  return (
-    <div>
-      <h1>Some Feed here soon</h1>
-    </div>
-  );
+export default function Default() {
+    return null;
 }
