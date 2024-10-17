@@ -13,6 +13,9 @@ export default function Home() {
           </li>
         ))}
       </ul> */}
+      {/* <div>
+        <Link href={`/jokes/1`}>1</Link>
+      </div> */}
     </div>
   );
 }
