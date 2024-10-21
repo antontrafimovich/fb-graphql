@@ -6,7 +6,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogHeader,
-} from "@/components/ui/dialog";
+} from "@/app/components/dialog";
 import { useRouter } from "next/navigation";
 
 
