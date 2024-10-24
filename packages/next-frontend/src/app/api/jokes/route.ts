@@ -35,21 +35,23 @@ async function* makeIterator() {
   yield encoder.encode("<p>John Doe</p>");
 }
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
-  const iterator = makeIterator();
-  const stream = iteratorToReadableStream(iterator);
+  // const iterator = makeIterator();
+  // const stream = iteratorToReadableStream(iterator);
 
-  return new Response(stream);
-  // const response = await fetch("http://localhost:7000/test", {
-  //   method: "POST",
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //   },
-  // });
+  // return new Response(stream);
+  const response = await fetch("http://localhost:7000/test", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 
-  // const result = await response.json();
+  const result = await response.json();
 
-  // console.log(result);
+  console.log(result);
 
-  // return Response.json({ data: result.message });
+  return Response.json({ data: result.message });
 }
