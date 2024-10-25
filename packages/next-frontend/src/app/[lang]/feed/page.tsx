@@ -1,5 +1,5 @@
 import Link from "next/link";
-import data from "../data/jokes.json";
+import data from "../../data/jokes.json";
 
 export default function Page() {
   return (
