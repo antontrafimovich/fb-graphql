@@ -1,6 +1,7 @@
-import Link from "next/link";
-import { Player } from "./shared/model/player";
-import { locales } from "../../dictionaries/locales/locales";
+import Link from 'next/link';
+
+import { getLocale } from '../../dictionaries/locales/locales';
+import { Player } from './shared/model/player';
 
 export default async function PlayersList({
   players,
@@ -9,7 +10,7 @@ export default async function PlayersList({
   players: Player[];
   locale: "en" | "pl";
 }) {
-  const { buyButton } = await locales[locale]();
+  const { buyButton } = await getLocale(locale);
 
   return (
     <ul>
